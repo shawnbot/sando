@@ -17,14 +17,16 @@
 
   var DEFAULT_OP = "over";
 
-  sando.make = function(stack, canvas, depth) {
+  sando.make = function(stack, canvas, width, height, depth) {
     if (!Array.isArray(stack)) {
       throw "sando stack must be an Array (got " + typeof stack + ")";
     }
 
     var hasSize = true;
-    if (!canvas) {
-      canvas = sando.canvas();
+    if (Array.isArray(canvas)) {
+      canvas = sando.canvas.apply(sando, canvas);
+    } else if (!canvas) {
+      canvas = sando.canvas(width, height);
       hasSize = false;
     }
 
@@ -46,14 +48,14 @@
         source = colorCanvas;
       // otherwise, assume source is an Image or Canvas
       } else if (Array.isArray(layer.layers)) {
-        source = sando.make(layer.layers, null, depth + 1);
+        source = sando.make(layer.layers, null, width, height, depth + 1);
       } else {
         source = layer.source;
       }
 
       if (!hasSize) {
-        canvas.width = source.width;
-        canvas.height = source.height;
+        canvas.width = width = source.width;
+        canvas.height = height = source.height;
         hasSize = true;
       }
 
