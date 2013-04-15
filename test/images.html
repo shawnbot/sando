@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="../sando.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <style>
+
+      body {
+        background: #eee;
+      }
+
+      canvas {
+        display: inline-block;
+        border: 1px solid #ccc;
+        margin: 0 10px 10px 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1>Sando Tests</h1>
+    <div id="images"></div>
+    <script>
+
+      /*
+      circle.png
+      cyan-magenta.png
+      square.png
+      yellow-green.png
+      */
+
+      var width = 256,
+          height = 256,
+          root = document.getElementById("images");
+
+      loadAndDraw([
+        {url: "images/cyan-magenta.png"},
+        {url: "images/circle.png", comp: "destination-in"}
+      ], "circle-mask");
+
+      loadAndDraw([
+        {url: "images/cyan-magenta.png"},
+        {url: "images/circle.png", comp: "destination-out"}
+      ], "circle-hole");
+
+      loadAndDraw([
+        {url: "images/yellow-green.png"},
+        {layers: [
+          {url: "images/cyan-magenta.png"},
+          {url: "images/square.png", comp: "destination-out"}
+        ]}
+      ], "circle-masked-frame");
+
+      loadAndDraw([
+        {url: "images/yellow-green.png"},
+        {url: "images/square.png", comp: "destination-in"}
+      ], "image-masks-color");
+
+      parseAndDraw(
+        "$9e7,($79e,square[destination-out])",
+        "white-square");
+
+      function parseAndDraw(str, id) {
+        var stack = sando.parse(str);
+        sando.eachLayer(stack, function(layer) {
+          layer.url = "images/" + layer.url + ".png";
+        });
+        var canvas = loadAndDraw(stack, id);
+        canvas.setAttribute("data-str", str);
+        canvas.classList.add("parsed");
+        return canvas;
+      }
+
+      function loadAndDraw(stack, id) {
+        var q = queue(),
+            canvas = sando.canvas(width, height);
+
+        if (id) canvas.id = id;
+        root.appendChild(canvas);
+
+        sando.eachLayer(stack, function(layer) {
+          if (!layer.url) return;
+          q.defer(function(callback) {
+            loadImage(layer.url, function(error, image) {
+              if (!error) layer.source = image;
+              callback.call(null, error, layer);
+            });
+          });
+        });
+
+        q.awaitAll(function(error, layers) {
+          sando.make(stack, canvas, width, height);
+        });
+
+        canvas.setAttribute("data-stack", sando.serialize(stack));
+        return canvas;
+      }
+
+      function loadImage(url, callback) {
+        var image = new Image();
+        image.onload = function(e) { callback.call(null, null, image); };
+        image.onerror = function(e) { callback.call(null, e, image); };
+        image.src = url;
+        return image;
+      }
+
+    </script>
+  </body>
+</html>
