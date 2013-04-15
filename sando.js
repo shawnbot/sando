@@ -45,12 +45,10 @@
         colorContext.fillRect(0, 0, canvas.width, canvas.height);
         source = colorCanvas;
       // otherwise, assume source is an Image or Canvas
+      } else if (Array.isArray(layer.layers)) {
+        source = sando.make(layer.layers, null, depth + 1);
       } else {
         source = layer.source;
-        // if it's an array, composite it
-        if (Array.isArray(source)) {
-          source = sando.make(source, null, depth + 1);
-        }
       }
 
       if (!hasSize) {
