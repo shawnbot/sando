@@ -107,7 +107,7 @@
         for (var i = 1; i < layers.length; i++) {
           if (typeof layers[i] === "string") {
             var chad = layers.splice(i, 1)[0],
-                match = chad.match(/^\[(\w*)(@(\d*)(p)?)?\]$/);
+                match = chad.match(/^\[([-a-z]*)(@(\d*)(p)?)?\]$/);
             if (match) {
               var prev = layers[i - 1];
               prev.comp = match[1] || DEFAULT_OP;
@@ -120,7 +120,7 @@
         }
         return layer;
       } else {
-        var match = layer.match(/^([^\[]+)(\[(\w*)(@(\d*)(p)?)?\])?$/);
+        var match = layer.match(/^([^\[]+)(\[([-a-z]*)(@(\d*)(p)?)?\])?$/);
         if (match) {
           var source = match[1];
           layer = {
