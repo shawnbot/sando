@@ -6,13 +6,16 @@
 
   sando.canvas = typeof document !== "undefined"
     ? function(width, height) {
-      return document.createElement(width, height);
+      var canvas = document.createElement("canvas");
+      if (width) canvas.width = canvas.height = width;
+      if (height) canvas.height = height;
+      return canvas;
     }
     : function(width, height) {
-      return new Canvas(width, height);
+      return new Canvas(width, height || width);
     };
 
-  var DEFAULT_OP = "source-out";
+  var DEFAULT_OP = "over";
 
   sando.make = function(stack, canvas, depth) {
     if (!Array.isArray(stack)) {
