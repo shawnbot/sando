@@ -98,9 +98,9 @@
 
     if (buffer.length) current.push(buffer.join(""));
 
-    function parseLayers(layer) {
+    function parseLayer(layer) {
       if (Array.isArray(layer)) {
-        var layers = layer.map(parseLayers),
+        var layers = layer.map(parseLayer),
             layer = layers.length > 1
               ? {layers: layers}
               : layers[0];
@@ -144,10 +144,15 @@
       }
     }
 
-    return parseLayers(current);
+    var layer = parseLayer(current);
+    return layer.layers || [layer];
   };
 
   sando.serialize = function(layer, depth) {
+    if (Array.isArray(layer)) {
+      layer = {layers: layer};
+    }
+
     if (!depth) depth = 0;
 
     var buffer = [];
@@ -187,13 +192,14 @@
     return String(fill).replace("#", "$");
   };
 
-  sando.eachLayer = function(stack) {
+  sando.eachLayer = function(stack, callback, context) {
     var layers = [];
     stack.forEach(function(layer) {
       if (Array.isArray(layer.layers)) {
-        layers = layers.concat(sando.eachLayer(layer.layers));
+        layers = layers.concat(sando.eachLayer(layer.layers, callback));
       } else {
         layers.push(layer);
+        callback.call(context || stack, layer);
       }
     });
     return layers;
