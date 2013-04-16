@@ -2,7 +2,7 @@
 <html>
   <head>
     <script src="../sando.js"></script>
-    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="../lib/queue.v1.min.js"></script>
     <style>
 
       body {
@@ -63,7 +63,7 @@
       function parseAndDraw(str, id) {
         var stack = sando.parse(str);
         sando.eachLayer(stack, function(layer) {
-          layer.url = "images/" + layer.url + ".png";
+          if (layer.url) layer.url = "images/" + layer.url + ".png";
         });
         var canvas = loadAndDraw(stack, id);
         canvas.setAttribute("data-str", str);
