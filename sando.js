@@ -51,13 +51,16 @@
             colorContext = colorCanvas.getContext("2d");
         colorContext.fillStyle = layer.fill;
         colorContext.fillRect(0, 0, canvas.width, canvas.height);
-        source = colorCanvas;
 
-        // XXX alpha "pre-blending"
+        // FIXME alpha "pre-blending"
+        /*
         if (!layer.post) {
           colorContext.globalCompositeOperation = "destination-in";
-          colorCanvas.drawImage(canvas, 0, 0, width, height);
+          colorContext.drawImage(canvas, 0, 0);
         }
+        */
+
+        source = colorCanvas;
 
       // otherwise, assume source is an Image or Canvas
       } else if (Array.isArray(layer.layers)) {
