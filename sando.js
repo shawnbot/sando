@@ -1,8 +1,12 @@
 (function(exports) {
 
-  var sando = exports.sando = {
+  var sando = {
     version: "0.0.1"
   };
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = sando;
+  }
 
   sando.canvas = typeof document !== "undefined"
     ? function(width, height) {
@@ -212,4 +216,4 @@
     return isNaN(num) ? def : num;
   }
 
-})((typeof module !== "undefined" && module.exports) ? module : this);
+})(this);
