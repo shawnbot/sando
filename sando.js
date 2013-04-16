@@ -50,12 +50,20 @@
         colorContext.fillStyle = layer.fill;
         colorContext.fillRect(0, 0, canvas.width, canvas.height);
         source = colorCanvas;
+
+        // XXX alpha "pre-blending"
+        if (!layer.post) {
+          colorContext.globalCompositeOperation = "destination-in";
+          colorCanvas.drawImage(canvas, 0, 0, width, height);
+        }
+
       // otherwise, assume source is an Image or Canvas
       } else if (Array.isArray(layer.layers)) {
         source = sando.make(layer.layers, null, width, height, depth + 1);
       } else {
         source = layer.source;
       }
+
 
       if (!hasSize) {
         canvas.width = width = source.width;
