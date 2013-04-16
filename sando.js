@@ -6,6 +6,8 @@
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = sando;
+  } else {
+    exports.sando = sando;
   }
 
   sando.canvas = typeof document !== "undefined"
