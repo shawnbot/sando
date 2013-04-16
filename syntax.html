@@ -47,7 +47,7 @@
       document.getElementById("form").onsubmit = update;
 
       if (location.hash && location.hash.length > 1) {
-        input.value = location.hash.substr(1);
+        input.value = decodeURIComponent(location.hash.substr(1));
       }
       update();
 
