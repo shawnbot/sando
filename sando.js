@@ -55,13 +55,11 @@
         colorContext.fillStyle = layer.fill;
         colorContext.fillRect(0, 0, canvas.width, canvas.height);
 
-        // FIXME alpha "pre-blending"
-        /*
+        // alpha "pre-blending"
         if (!layer.post) {
           colorContext.globalCompositeOperation = "destination-in";
           colorContext.drawImage(canvas, 0, 0);
         }
-        */
 
         source = colorCanvas;
 
