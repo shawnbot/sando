@@ -17,9 +17,12 @@
       if (height) canvas.height = height;
       return canvas;
     }
-    : function(width, height) {
-      return new Canvas(width, height || width);
-    };
+    : (function() {
+      var Canvas = require("canvas");
+      return function(width, height) {
+        return new Canvas(width, height || width);
+      };
+    })();
 
   var DEFAULT_OP = "over";
 
@@ -78,7 +81,7 @@
 
       ctx.globalAlpha = isNaN(layer.alpha) ? 1 : layer.alpha / 100;
       ctx.globalCompositeOperation = layer.comp || DEFAULT_OP;
-      ctx.drawImage(source, 0, 0); // TODO: x, y, width, height
+      ctx.drawImage(source, 0, 0, source.width, source.height); // TODO: x, y, width, height
 
     });
 
