@@ -71,15 +71,17 @@
       }
 
 
-      if (!hasSize) {
-        canvas.width = width = source.width;
-        canvas.height = height = source.height;
-        hasSize = true;
-      }
+      if (source) {
+        if (!hasSize) {
+          canvas.width = width = source.width;
+          canvas.height = height = source.height;
+          hasSize = true;
+        }
 
-      ctx.globalAlpha = isNaN(layer.alpha) ? 1 : layer.alpha / 100;
-      ctx.globalCompositeOperation = layer.comp || DEFAULT_OP;
-      ctx.drawImage(source, 0, 0, source.width, source.height); // TODO: x, y, width, height
+        ctx.globalAlpha = isNaN(layer.alpha) ? 1 : layer.alpha / 100;
+        ctx.globalCompositeOperation = layer.comp || DEFAULT_OP;
+        ctx.drawImage(source, 0, 0, source.width, source.height); // TODO: x, y, width, height
+      }
 
     });
 
