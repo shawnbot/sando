@@ -1,6 +1,6 @@
 {
   "name": "sando",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Declarative canvas compositing for humans",
   "main": "sando.js",
   "scripts": {
