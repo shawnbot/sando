@@ -1,8 +1,10 @@
 (function(exports) {
 
-  var sando = {
-    version: "0.0.1"
-  };
+  var sando = function() {};
+
+  sando.version = "1.0.1";
+
+  var async = require("async");
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = sando;
@@ -10,48 +12,42 @@
     exports.sando = sando;
   }
 
-  sando.canvas = typeof document !== "undefined"
-    ? function(width, height) {
+  sando.prototype.canvas = typeof document !== "undefined"
+    ? function(width, height, callback) {
       var canvas = document.createElement("canvas");
       if (width) canvas.width = canvas.height = width;
       if (height) canvas.height = height;
-      return canvas;
+      return callback(null, canvas);
     }
     : (function() {
       var Canvas = require("canvas");
-      return function(width, height) {
-        return new Canvas(width, height || width);
+      return function(width, height, callback) {
+        return callback(null, new Canvas(width, height || width));
       };
     })();
 
   var DEFAULT_OP = "over";
 
-  sando.make = function(stack, canvas, width, height, depth) {
-    if (!Array.isArray(stack)) {
-      throw "sando stack must be an Array (got " + typeof stack + ")";
+  /**
+   * Make a canvas if necessary.
+   * Expects a callback accepting (err, canvas, hasSize)
+   */
+  sando.prototype.makeCanvas = function(canvas, width, height, callback) {
+    if (canvas) {
+      return callback(null, canvas, true);
     }
 
-    var hasSize = true;
-    if (Array.isArray(canvas)) {
-      canvas = sando.canvas.apply(sando, canvas);
-    } else if (!canvas) {
-      canvas = sando.canvas(width, height);
-      hasSize = false;
-    }
+    return this.canvas(width, height, function(err, canvas) {
+      return callback(null, canvas, false);
+    });
+  };
 
-    var ctx = canvas.getContext("2d");
-    stack.forEach(function(layer, i) {
-
-      if (!layer || typeof layer !== "object") {
-        throw "sando layer must be an object (got " + typeof layer + ")";
-      }
-
-      var source;
-      // if the layer has a fill, create a new canvas and fill it with that
-      // style (either a CSS color, gradient, or pattern)
-      if (layer.fill) {
-        var colorCanvas = sando.canvas(canvas.width, canvas.height),
-            colorContext = colorCanvas.getContext("2d");
+  sando.prototype.makeSource = function(canvas, layer, width, height, depth, callback) {
+    // if the layer has a fill, create a new canvas and fill it with that
+    // style (either a CSS color, gradient, or pattern)
+    if (layer.fill) {
+      this.canvas(canvas.width, canvas.height, function(err, colorCanvas) {
+        var colorContext = colorCanvas.getContext("2d");
         colorContext.fillStyle = layer.fill;
         colorContext.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -61,31 +57,60 @@
           colorContext.drawImage(canvas, 0, 0);
         }
 
-        source = colorCanvas;
+        return callback(null, colorCanvas);
+      });
 
-      // otherwise, assume source is an Image or Canvas
-      } else if (Array.isArray(layer.layers)) {
-        source = sando.make(layer.layers, null, width, height, depth + 1);
-      } else {
-        source = layer.source;
-      }
+    // otherwise, assume source is an Image or Canvas
+    } else if (Array.isArray(layer.layers)) {
+      return this.make(layer.layers, null, width, height, depth + 1, callback);
+    } else {
+      return callback(null, layer.source);
+    }
+  };
 
+  sando.prototype.make = function(stack, canvas, width, height, depth, callback) {
+    if (canvas instanceof Function) {
+      callback = canvas;
+      canvas = null;
+    } else {
+      // width, height, and depth are optional arguments, so fetch the last arg
+      // for the callback
+      callback = arguments[arguments.length - 1];
+    }
 
-      if (source) {
-        if (!hasSize) {
-          canvas.width = width = source.width;
-          canvas.height = height = source.height;
-          hasSize = true;
+    var self = this;
+
+    if (!Array.isArray(stack)) {
+      throw "sando stack must be an Array (got " + typeof stack + ")";
+    }
+
+    this.makeCanvas(canvas, width, height, function(err, canvas, hasSize) {
+      var ctx = canvas.getContext("2d");
+      async.eachSeries(stack, function(layer, cb) {
+
+        if (!layer || typeof layer !== "object") {
+          throw "sando layer must be an object (got " + typeof layer + ")";
         }
 
-        ctx.globalAlpha = isNaN(layer.alpha) ? 1 : layer.alpha / 100;
-        ctx.globalCompositeOperation = layer.comp || DEFAULT_OP;
-        ctx.drawImage(source, 0, 0, source.width, source.height); // TODO: x, y, width, height
-      }
+        self.makeSource(canvas, layer, width, height, depth, function(err, source) {
+          if (source) {
+            if (!hasSize) {
+              canvas.width = width = source.width;
+              canvas.height = height = source.height;
+              hasSize = true;
+            }
 
+            ctx.globalAlpha = isNaN(layer.alpha) ? 1 : layer.alpha / 100;
+            ctx.globalCompositeOperation = layer.comp || DEFAULT_OP;
+            ctx.drawImage(source, 0, 0, source.width, source.height); // TODO: x, y, width, height
+          }
+
+          return cb();
+        });
+      }, function() {
+        return callback(null, canvas);
+      });
     });
-
-    return canvas;
   };
 
   sando.parse = function(str) {
