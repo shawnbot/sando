@@ -57,7 +57,9 @@
           colorContext.drawImage(canvas, 0, 0);
         }
 
-        return callback(null, colorCanvas);
+        return setImmediate(function() {
+          return callback(null, colorCanvas);
+        });
       });
 
     // otherwise, assume source is an Image or Canvas
