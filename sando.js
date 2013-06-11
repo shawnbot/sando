@@ -105,7 +105,7 @@
             ctx.drawImage(source, 0, 0, source.width, source.height); // TODO: x, y, width, height
           }
 
-          return cb();
+          return setImmediate(cb);
         });
       }, function() {
         return callback(null, canvas);
