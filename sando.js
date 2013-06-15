@@ -47,6 +47,13 @@
     // style (either a CSS color, gradient, or pattern)
     if (layer.fill) {
       this.canvas(canvas.width, canvas.height, function(err, colorCanvas) {
+        console.log("canvas_id=%s source=%s comp=%s alpha=%s complete=%s",
+                    colorCanvas.id,
+                    layer.url || layer.fill || "grouped",
+                    layer.comp || "",
+                    layer.alpha || "",
+                    layer.url ? layer.source.complete : "");
+
         var colorContext = colorCanvas.getContext("2d");
         colorContext.fillStyle = layer.fill;
         colorContext.fillRect(0, 0, canvas.width, canvas.height);
@@ -87,15 +94,15 @@
     }
 
     this.makeCanvas(canvas, width, height, function(err, canvas, hasSize) {
+      console.log("canvas_id=%s source=%s comp=%s alpha=%s complete=%s",
+                  canvas.id,
+                  layer.url || layer.fill || "grouped",
+                  layer.comp || "",
+                  layer.alpha || "",
+                  layer.url ? layer.source.complete : "");
+
       var ctx = canvas.getContext("2d");
       async.eachSeries(stack, function(layer, cb) {
-        console.log("canvas_id=%s source=%s comp=%s alpha=%s complete=%s",
-                    canvas.id,
-                    layer.url || layer.fill || "grouped",
-                    layer.comp || "",
-                    layer.alpha || "",
-                    layer.url ? layer.source.complete : "");
-
         if (!layer || typeof layer !== "object") {
           throw "sando layer must be an object (got " + typeof layer + ")";
         }
