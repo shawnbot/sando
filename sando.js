@@ -89,6 +89,12 @@
     this.makeCanvas(canvas, width, height, function(err, canvas, hasSize) {
       var ctx = canvas.getContext("2d");
       async.eachSeries(stack, function(layer, cb) {
+        console.log("canvas_id=%s source=%s comp=%s alpha=%s complete=%s",
+                    canvas.id,
+                    layer.url || layer.fill || "grouped",
+                    layer.comp || "",
+                    layer.alpha || "",
+                    layer.url ? layer.source.complete : "");
 
         if (!layer || typeof layer !== "object") {
           throw "sando layer must be an object (got " + typeof layer + ")";
