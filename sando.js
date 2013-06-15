@@ -94,8 +94,6 @@
     }
 
     this.makeCanvas(canvas, width, height, function(err, canvas, hasSize) {
-      console.log("canvas_id=%s grouped", canvas.id);
-
       var ctx = canvas.getContext("2d");
       async.eachSeries(stack, function(layer, cb) {
         if (!layer || typeof layer !== "object") {
@@ -104,6 +102,12 @@
 
         self.makeSource(canvas, layer, width, height, depth, function(err, source) {
           if (source) {
+            console.log("canvas_id=%s source=%s comp=%s alpha=%s",
+                        canvas.id,
+                        layer.url || layer.fill || "grouped",
+                        layer.comp || "",
+                        layer.alpha || "");
+
             if (!hasSize) {
               canvas.width = width = source.width;
               canvas.height = height = source.height;
