@@ -61,12 +61,12 @@
         // alpha "pre-blending"
         if (!layer.post) {
           colorContext.globalCompositeOperation = "destination-in";
-          colorContext.drawImage(canvas, 0, 0);
+          return colorContext.drawImage(canvas, 0, 0, function(err) {
+            return callback(null, colorCanvas);
+          });
         }
 
-        return setImmediate(function() {
-          return callback(null, colorCanvas);
-        });
+        return callback(null, colorCanvas);
       });
 
     // otherwise, assume source is an Image or Canvas
@@ -116,10 +116,10 @@
 
             ctx.globalAlpha = isNaN(layer.alpha) ? 1 : layer.alpha / 100;
             ctx.globalCompositeOperation = layer.comp || DEFAULT_OP;
-            ctx.drawImage(source, 0, 0, source.width, source.height); // TODO: x, y, width, height
+            return ctx.drawImage(source, 0, 0, source.width, source.height, cb); // TODO: x, y, width, height
           }
 
-          return setImmediate(cb);
+          return cb();
         });
       }, function() {
         return callback(null, canvas);
