@@ -116,7 +116,11 @@
 
             ctx.globalAlpha = isNaN(layer.alpha) ? 1 : layer.alpha / 100;
             ctx.globalCompositeOperation = layer.comp || DEFAULT_OP;
-            return ctx.drawImage(source, 0, 0, source.width, source.height, cb); // TODO: x, y, width, height
+            try {
+              return ctx.drawImage(source, 0, 0, source.width, source.height, cb); // TODO: x, y, width, height
+            } catch (err) {
+              return cb(err);
+            }
           }
 
           return cb();
